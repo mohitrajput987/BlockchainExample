@@ -1,18 +1,28 @@
 package com.otb.blockchain;
 
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gson.GsonBuilder;
 import com.otb.blockchain.model.Block;
+import com.otb.blockchain.model.Transaction;
+import com.otb.blockchain.model.TransactionInput;
+import com.otb.blockchain.model.Wallet;
+import com.otb.blockchain.utils.StringUtils;
 
 public class BlockChainMain {
 	private static List<Block> listBlocks = new ArrayList();
-	private final static int DIFFICULTY = 2;
+	private final static int DIFFICULTY = 5;
 
 	public static void main(String[] args) {
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		// test_BlockCreationAndMining();
+		test_WalletAndSignature();
+	}
 
+	private static void test_BlockCreationAndMining() {
 		listBlocks.add(new Block("Laddu sent Golu $2", "0"));
 		listBlocks.get(0).mineBlock(DIFFICULTY);
 		listBlocks.add(new Block("Golu sent Laddu $5", listBlocks.get(
@@ -24,7 +34,21 @@ public class BlockChainMain {
 		String blocksJson = new GsonBuilder().setPrettyPrinting().create()
 				.toJson(listBlocks);
 		System.out.println(blocksJson);
-		System.out.println("isChainValid="+isChainValid());
+		System.out.println("isChainValid=" + isChainValid());
+	}
+
+	private static void test_WalletAndSignature() {
+		Wallet walletOne = new Wallet();
+		Wallet walletTwo = new Wallet();
+		System.out.println("WalletOne\nPrivateKey: "
+				+ StringUtils.getStringFromKey(walletOne.getPrivateKey())
+				+ "\nPublicKey: "
+				+ StringUtils.getStringFromKey(walletOne.getPublicKey()));
+		
+		List<TransactionInput> inputs = new ArrayList<>();
+		Transaction transaction = new Transaction(walletOne.getPublicKey(), walletTwo.getPublicKey(), 5.0f, inputs);
+		transaction.generateSignature(walletOne.getPrivateKey());
+		System.out.println("Is signature valid="+transaction.isSignatureValid());
 	}
 
 	public static boolean isChainValid() {
@@ -43,7 +67,8 @@ public class BlockChainMain {
 					System.err.println("Previous hash is not equal");
 					return false;
 				}
-				if(!currentBlock.getHash().subSequence(0, DIFFICULTY).equals(hashTarget)){
+				if (!currentBlock.getHash().subSequence(0, DIFFICULTY)
+						.equals(hashTarget)) {
 					System.err.println("This block has not been minded");
 					return false;
 				}
