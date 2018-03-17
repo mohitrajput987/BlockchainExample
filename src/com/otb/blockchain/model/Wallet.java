@@ -6,10 +6,17 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.ECGenParameterSpec;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.otb.blockchain.BlockChainMain;
 
 public class Wallet {
 	private PrivateKey privateKey;
 	private PublicKey publicKey;
+	private HashMap<String, TransactionOutput> UTXOs = new HashMap<>();
 
 	public Wallet() {
 		generateKeyPair();
@@ -36,5 +43,47 @@ public class Wallet {
 
 	public PublicKey getPublicKey() {
 		return publicKey;
+	}
+
+	public float getBalance() {
+		float total = 0;
+		for (Map.Entry<String, TransactionOutput> entry : BlockChainMain.UTXOs
+				.entrySet()) {
+			TransactionOutput transactionOutput = entry.getValue();
+			if (transactionOutput.isMine(publicKey)) {
+				UTXOs.put(transactionOutput.getId(), transactionOutput);
+				total += transactionOutput.getValue();
+			}
+		}
+		return total;
+	}
+
+	public Transaction sendFunds(PublicKey receiver, float value) {
+		if (getBalance() < value) {
+			System.err.println("Not enough balance to proceed this transaction");
+			return null;
+		}
+
+		List<TransactionInput> inputs = new ArrayList<>();
+		float total = 0;
+		for (Map.Entry<String, TransactionOutput> entry : BlockChainMain.UTXOs
+				.entrySet()) {
+			TransactionOutput transactionOutput = entry.getValue();
+			total += transactionOutput.getValue();
+			inputs.add(new TransactionInput(transactionOutput.getId()));
+			if (total > value) {
+				break;
+			}
+		}
+
+		Transaction transaction = new Transaction(publicKey, receiver, value,
+				inputs);
+		transaction.generateSignature(privateKey);
+
+		for (TransactionInput transactionInput : inputs) {
+			UTXOs.remove(transactionInput.getTransactionOutputId());
+		}
+		
+		return transaction;
 	}
 }
