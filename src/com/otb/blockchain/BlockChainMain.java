@@ -2,6 +2,7 @@ package com.otb.blockchain;
 
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -9,11 +10,14 @@ import com.google.gson.GsonBuilder;
 import com.otb.blockchain.model.Block;
 import com.otb.blockchain.model.Transaction;
 import com.otb.blockchain.model.TransactionInput;
+import com.otb.blockchain.model.TransactionOutput;
 import com.otb.blockchain.model.Wallet;
 import com.otb.blockchain.utils.StringUtils;
 
 public class BlockChainMain {
-	private static List<Block> listBlocks = new ArrayList();
+	public static List<Block> listBlocks = new ArrayList<>();
+	public static HashMap<String, TransactionOutput> UTXOs = new HashMap<>();
+	public static float minimumTransaction = 1;
 	private final static int DIFFICULTY = 5;
 
 	public static void main(String[] args) {
@@ -23,12 +27,12 @@ public class BlockChainMain {
 	}
 
 	private static void test_BlockCreationAndMining() {
-		listBlocks.add(new Block("Laddu sent Golu $2", "0"));
+		listBlocks.add(new Block("Mohit sent Sparsh $2", "0"));
 		listBlocks.get(0).mineBlock(DIFFICULTY);
-		listBlocks.add(new Block("Golu sent Laddu $5", listBlocks.get(
+		listBlocks.add(new Block("Sparsh sent Vikas $5", listBlocks.get(
 				listBlocks.size() - 1).getHash()));
 		listBlocks.get(1).mineBlock(DIFFICULTY);
-		listBlocks.add(new Block("Aman sent Golu $3", listBlocks.get(
+		listBlocks.add(new Block("Garvit sent Ravi $3", listBlocks.get(
 				listBlocks.size() - 1).getHash()));
 		listBlocks.get(2).mineBlock(DIFFICULTY);
 		String blocksJson = new GsonBuilder().setPrettyPrinting().create()
