@@ -1,6 +1,14 @@
 # BlockchainExample
  A Java project to explain concept of Blockchain and Cryptocurrency.
  
+ ## Blockchain
+ Blockchain is a continuously growing list of records called "block". Each block contains-
+ - Transaction Data
+ - Hash
+ - Previous block's hash
+ - Timestamp
+ - Nonce
+ 
  ## Project contains following models/entities
  - Block
  - Wallet
